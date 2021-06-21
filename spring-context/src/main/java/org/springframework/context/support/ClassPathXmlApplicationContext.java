@@ -16,6 +16,8 @@
 
 package org.springframework.context.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -50,6 +52,8 @@ import org.springframework.util.Assert;
  * @see GenericApplicationContext
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
+
+	private static final Log logger = LogFactory.getLog("black");
 
 	@Nullable
 	private Resource[] configResources;
@@ -139,8 +143,16 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			throws BeansException {
 
 		super(parent);
+
+		//设置配置文件路径
+		logger.info("设置文件路径");
 		setConfigLocations(configLocations);
+		for (String s : configLocations) {
+			logger.info("配置文件路径:" + s);
+		}
 		if (refresh) {
+			//刷新spring容器
+			logger.info("开始刷新spring容器");
 			refresh();
 		}
 	}

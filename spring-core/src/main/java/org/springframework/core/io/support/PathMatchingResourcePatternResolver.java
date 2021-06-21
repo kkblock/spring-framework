@@ -16,44 +16,22 @@
 
 package org.springframework.core.io.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.*;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.net.*;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
-import org.springframework.core.io.VfsResource;
-import org.springframework.lang.Nullable;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.PathMatcher;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link ResourcePatternResolver} implementation that is able to resolve a
@@ -278,17 +256,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	public Resource[] getResources(String locationPattern) throws IOException {
 		Assert.notNull(locationPattern, "Location pattern must not be null");
 		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
+			// 类路径资源（可能有多个同名资源）
 			// a class path resource (multiple resources for same name possible)
 			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
 				// a class path resource pattern
+				// 类路径资源模式
 				return findPathMatchingResources(locationPattern);
 			}
 			else {
+				// 具有给定名称的所有类路径资源
 				// all class path resources with the given name
 				return findAllClassPathResources(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()));
 			}
 		}
 		else {
+			// 通常只在前缀后面查找一个模式，并且在Tomcat之后只有“* /”分隔符之后的“war：”协议。
 			// Generally only look for a pattern after a prefix here,
 			// and on Tomcat only after the "*/" separator for its "war:" protocol.
 			int prefixEnd = (locationPattern.startsWith("war:") ? locationPattern.indexOf("*/") + 1 :
